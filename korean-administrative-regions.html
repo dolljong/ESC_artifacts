@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국 행정구역 지진구역 검색 및 위험도계수 계산</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: auto;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+        .narrow {
+            width: 1%;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>한국 행정구역 지진구역 검색 및 위험도계수 계산</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th class="narrow">지진구역</th>
+                <th class="narrow">구분</th>
+                <th>행정구역</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="narrow" rowspan="2">I</td>
+                <td class="narrow">시</td>
+                <td>서울, 인천, 대전, 부산, 대구, 울산, 광주, 세종</td>
+            </tr>
+            <tr>
+                <td class="narrow">도</td>
+                <td>경기, 충북, 충남, 경북, 경남, 전북, 전남, 강원 남부<sup>1</sup></td>
+            </tr>
+            <tr>
+                <td class="narrow">II</td>
+                <td class="narrow">도</td>
+                <td>강원 북부<sup>2</sup>, 제주</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">
+                    <sup>1</sup> 강원 남부(군, 시): 영월, 정선, 삼척, 강릉, 동해, 원주, 태백<br>
+                    <sup>2</sup> 강원 북부(군, 시): 홍천, 철원, 화천, 횡성, 평창, 양구, 인제, 고성, 양양, 춘천, 속초
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="input-section">
+        <label for="regionInput">행정구역 이름 입력:</label>
+        <input type="text" id="regionInput" placeholder="예: 서울">
+        <button onclick="searchRegion()">검색</button>
+    </div>
+    <div id="result"></div>
+
+    <h2>지진구역계수</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>지진구역</th>
+                <th>Ⅰ</th>
+                <th>Ⅱ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>지진구역계수</td>
+                <td>0.11</td>
+                <td>0.07</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>평균재현주기 및 위험도계수</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>평균재현주기 (년)</th>
+                <th>50</th>
+                <th>100</th>
+                <th>200</th>
+                <th>500</th>
+                <th>1,000</th>
+                <th>2,400</th>
+                <th>4,800</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>위험도계수</td>
+                <td>0.40</td>
+                <td>0.57</td>
+                <td>0.73</td>
+                <td>1</td>
+                <td>1.4</td>
+                <td>2.0</td>
+                <td>2.6</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="input-section">
+        <label for="returnPeriod">평균재현주기 선택:</label>
+        <select id="returnPeriod" onchange="calculateRiskFactor()">
+            <option value="">선택하세요</option>
+            <option value="50">50년</option>
+            <option value="100">100년</option>
+            <option value="200">200년</option>
+            <option value="500">500년</option>
+            <option value="1000">1,000년</option>
+            <option value="2400">2,400년</option>
+            <option value="4800">4,800년</option>
+        </select>
+    </div>
+    <div id="riskFactorResult"></div>
+
+    <script>
+        const regions = {
+            'I': [
+                '서울', '인천', '대전', '부산', '대구', '울산', '광주', '세종',
+                '경기', '충북', '충남', '경북', '경남', '전북', '전남',
+                '영월', '정선', '삼척', '강릉', '동해', '원주', '태백'
+            ],
+            'II': [
+                '제주', '홍천', '철원', '화천', '횡성', '평창', '양구', '인제', '고성', '양양', '춘천', '속초'
+            ]
+        };
+
+        const seismicCoefficients = {
+            'I': 0.11,
+            'II': 0.07
+        };
+
+        const riskFactors = {
+            '50': 0.40,
+            '100': 0.57,
+            '200': 0.73,
+            '500': 1,
+            '1000': 1.4,
+            '2400': 2.0,
+            '4800': 2.6
+        };
+
+        function searchRegion() {
+            const input = document.getElementById('regionInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (regions['I'].includes(input)) {
+                resultDiv.textContent = `${input}은(는) 지진구역 I에 속합니다. 지진구역계수는 ${seismicCoefficients['I']}입니다.`;
+            } else if (regions['II'].includes(input)) {
+                resultDiv.textContent = `${input}은(는) 지진구역 II에 속합니다. 지진구역계수는 ${seismicCoefficients['II']}입니다.`;
+            } else {
+                resultDiv.textContent = `${input}은(는) 테이블에 없는 행정구역입니다.`;
+            }
+        }
+
+        function calculateRiskFactor() {
+            const returnPeriod = document.getElementById('returnPeriod').value;
+            const resultDiv = document.getElementById('riskFactorResult');
+            
+            if (returnPeriod) {
+                const riskFactor = riskFactors[returnPeriod];
+                resultDiv.textContent = `선택한 평균재현주기 ${returnPeriod}년에 대한 위험도계수는 ${riskFactor}입니다.`;
+            } else {
+                resultDiv.textContent = '평균재현주기를 선택해주세요.';
+            }
+        }
+    </script>
+</body>
+</html>
