@@ -8,7 +8,8 @@ claude에게 설계기준이나 기존 문서를 주고서 프로그램을 만�
 
 이 repo에는 웹앱(보통은 html)을 다운 받아서 이곳에 올리고자 합니다.
 
-현재 이곳에 있는 웹앱들입니다.
+현재 이곳에 있는 웹앱들의 리스트입니다.
 
 ## 파일리스트
-- korean-administrative-regions.html
+- korean-administrative-regions.html : 지진구역계수 및 위험도계수 계산
+
