@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주동토압계수(Ka,Coulomb토압) 계산기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>주동토압계수(Ka,Coulomb토압) 계산기</h1>
+        <div>
+            <h3>공식:</h3>
+            <div id="formula">
+                \[K_a = \frac{\cos^2(\phi - \theta)}{\cos^2\theta\cos(\theta + \delta)\left[1 + \sqrt{\frac{\sin(\phi + \delta)\sin(\phi - \alpha)}{\cos(\theta + \delta)\cos(\theta - \alpha)}}\right]^2}\]
+            </div>
+        </div>
+        <div>
+            <label for="phi">φ (파이) 단위: 도(°): <span>흙의 전단저항각(°)</span></label>
+            <input type="number" id="phi" value="30" placeholder="φ 값 입력">
+        </div>
+        <div>
+            <label for="theta">θ (세타) 단위: 도(°): <span>벽배면과 연직면이 이루는 각(°)</span></label>
+            <input type="number" id="theta" value="0" placeholder="θ 값 입력">
+        </div>
+        <div>
+            <label for="delta">δ (델타) 단위: 도(°): <span>벽배면과 흙 사이의 벽면마찰각(°)</span></label>
+            <input type="number" id="delta" value="0" placeholder="δ 값 입력">
+        </div>
+        <div>
+            <label for="alpha">α (알파) 단위: 도(°): <span>지표면과 수평면이 이루는 각(°)</span></label>
+            <input type="number" id="alpha" value="0" placeholder="α 값 입력">
+        </div>
+        <button onclick="calculateKa()">Ka 계산하기</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculateKa() {
+            const phi = parseFloat(document.getElementById('phi').value);
+            const theta = parseFloat(document.getElementById('theta').value);
+            const delta = parseFloat(document.getElementById('delta').value);
+            const alpha = parseFloat(document.getElementById('alpha').value);
+
+            const phiRad = (phi * Math.PI) / 180;
+            const thetaRad = (theta * Math.PI) / 180;
+            const deltaRad = (delta * Math.PI) / 180;
+            const alphaRad = (alpha * Math.PI) / 180;
+
+            const numerator = Math.cos(phiRad - thetaRad) ** 2;
+            const denominatorPart1 = Math.cos(thetaRad) ** 2 * Math.cos(thetaRad + deltaRad);
+            const denominatorPart2 =
+                1 +
+                Math.sqrt(
+                    (Math.sin(phiRad + deltaRad) * Math.sin(phiRad - alphaRad)) /
+                    (Math.cos(thetaRad + deltaRad) * Math.cos(thetaRad - alphaRad))
+                );
+            const denominator = denominatorPart1 * denominatorPart2 ** 2;
+
+            const ka = numerator / denominator;
+
+            const substitutedFormula = `K_a = \\frac{\\cos^2(${phi}° - ${theta}°)}{\\cos^2${theta}°\\cos(${theta}° + ${delta}°)\\left[1 + \\sqrt{\\frac{\\sin(${phi}° + ${delta}°)\\sin(${phi}° - ${alpha}°)}{\\cos(${theta}° + ${delta}°)\\cos(${theta}° - ${alpha}°)}}\\right]^2}`;
+
+            const resultHtml = `
+                <h3>결과:</h3>
+                <h4>대입된 공식:</h4>
+                <div>\\[${substitutedFormula}\\]</div>
+                <h4>계산된 Ka:</h4>
+                <p><strong>${ka.toFixed(6)}</strong></p>
+            `;
+
+            document.getElementById('result').innerHTML = resultHtml;
+
+            // MathJax를 사용하여 수식 렌더링
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('result')]);
+        }
+
+        // 페이지 로드 시 초기 계산 실행
+        window.onload = calculateKa;
+    </script>
+</body>
+</html>
