@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>철근 단면적 및 단위 m당 철근량(계산기)</title>
+    <style>
+        h2 {
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            /* table aline center */
+            margin-right: auto;
+            margin-left: auto;
+            /* width: 100%; */
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            white-space: nowrap;
+        }
+        .calculator {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .calculator label, .calculator select, .calculator button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .highlighted {
+            background-color: #ccffff;
+        }
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #resultValue {
+            width: 150px;
+            text-align: center;
+            font-size: 16px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>철근 단면적 및 단위 m당 철근량(계산기)</h1>
+    <table>
+        <tr>
+            <th colspan="2">호 칭<br>(mm)</th>
+            <th>D10</th>
+            <th>D13</th>
+            <th>D16</th>
+            <th>D19</th>
+            <th>D22</th>
+            <th>D25</th>
+            <th>D29</th>
+            <th>D32</th>
+            <th>D35</th>
+            <th>D38</th>
+        </tr>
+        <tr>
+            <th colspan="2">직 경<br>(mm)</th>
+            <td>9.53</td>
+            <td>12.7</td>
+            <td>15.9</td>
+            <td>19.1</td>
+            <td>22.2</td>
+            <td>25.4</td>
+            <td>28.6</td>
+            <td>31.8</td>
+            <td>34.9</td>
+            <td>38.1</td>
+        </tr>
+        <tr>
+            <th colspan="2">단면적<br>(mm²)</th>
+            <td>71.33</td>
+            <td>126.7</td>
+            <td>198.6</td>
+            <td>286.5</td>
+            <td>387.1</td>
+            <td>506.7</td>
+            <td>642.4</td>
+            <td>794.2</td>
+            <td>956.6</td>
+            <td>1,140</td>
+        </tr>
+        <tr  class="highlighted">
+            <th rowspan="17" class="vertical-text">철근간격 (mm)</th>
+            <th  class="highlighted">100</th>
+            <td>713</td>
+            <td>1,270</td>
+            <td>1,990</td>
+            <td>2,870</td>
+            <td>3,870</td>
+            <td>5,070</td>
+            <td>6,420</td>
+            <td>7,940</td>
+            <td>9,570</td>
+            <td>11,400</td>
+        </tr>
+        <!--tr>
+            <th>120</th>
+            <td>594</td>
+            <td>1,060</td>
+            <td>1,650</td>
+            <td>2,390</td>
+            <td>3,230</td>
+            <td>4,220</td>
+            <td>5,350</td>
+            <td>6,620</td>
+            <td>7,970</td>
+            <td>9,500</td>
+        </tr-->
+        <tr  class="highlighted">
+            <th  class="highlighted">125</th>
+            <td>571</td>
+            <td>1,010</td>
+            <td>1,590</td>
+            <td>2,290</td>
+            <td>3,100</td>
+            <td>4,050</td>
+            <td>5,140</td>
+            <td>6,350</td>
+            <td>7,650</td>
+            <td>9,120</td>
+        </tr>
+        <!--tr>
+            <th>140</th>
+            <td>509</td>
+            <td>905</td>
+            <td>1,420</td>
+            <td>2,050</td>
+            <td>2,760</td>
+            <td>3,620</td>
+            <td>4,590</td>
+            <td>5,670</td>
+            <td>6,830</td>
+            <td>8,140</td>
+        </tr-->
+        <tr class="highlighted">
+            <th class="highlighted">150</th>
+            <td>476</td>
+            <td>845</td>
+            <td>1,330</td>
+            <td>1,910</td>
+            <td>2,580</td>
+            <td>3,380</td>
+            <td>4,290</td>
+            <td>5,300</td>
+            <td>6,380</td>
+            <td>7,660</td>
+        </tr>
+        <!--tr>
+            <th>160</th>
+            <td>446</td>
+            <td>792</td>
+            <td>1,240</td>
+            <td>1,790</td>
+            <td>2,420</td>
+            <td>3,170</td>
+            <td>4,020</td>
+            <td>4,960</td>
+            <td>5,980</td>
+            <td>7,130</td>
+        </tr-->
+        <!--tr>
+            <th>175</th>
+            <td>407</td>
+            <td>723</td>
+            <td>1,130</td>
+            <td>1,640</td>
+            <td>2,210</td>
+            <td>2,890</td>
+            <td>3,670</td>
+            <td>4,540</td>
+            <td>5,460</td>
+            <td>6,510</td>
+        </tr-->
+        <!--tr>
+            <th>180</th>
+            <td>397</td>
+            <td>704</td>
+            <td>1,100</td>
+            <td>1,590</td>
+            <td>2,150</td>
+            <td>2,820</td>
+            <td>3,570</td>
+            <td>4,420</td>
+            <td>5,330</td>
+            <td>6,340</td>
+        </tr-->
+        <tr class="highlighted">
+            <th class="highlighted">200</th>
+            <td>357</td>
+            <td>634</td>
+            <td>993</td>
+            <td>1,430</td>
+            <td>1,940</td>
+            <td>2,530</td>
+            <td>3,210</td>
+            <td>3,970</td>
+            <td>4,780</td>
+            <td>5,700</td>
+        </tr>
+        <!--tr>
+            <th>220</th>
+            <td>325</td>
+            <td>576</td>
+            <td>904</td>
+            <td>1,300</td>
+            <td>1,760</td>
+            <td>2,310</td>
+            <td>2,980</td>
+            <td>3,610</td>
+            <td>4,350</td>
+            <td>5,190</td>
+        </tr-->
+        <!--tr>
+            <th>225</th>
+            <td>317</td>
+            <td>563</td>
+            <td>882</td>
+            <td>1,270</td>
+            <td>1,720</td>
+            <td>2,250</td>
+            <td>2,850</td>
+            <td>3,530</td>
+            <td>4,250</td>
+            <td>5,060</td>
+        </tr-->
+        <!--tr>
+            <th>240</th>
+            <td>297</td>
+            <td>528</td>
+            <td>828</td>
+            <td>1,200</td>
+            <td>1,610</td>
+            <td>2,110</td>
+            <td>2,680</td>
+            <td>3,310</td>
+            <td>3,990</td>
+            <td>4,750</td>
+        </tr-->
+        <tr class="highlighted">
+            <th class="highlighted">250</th>
+            <td>285</td>
+            <td>507</td>
+            <td>794</td>
+            <td>1,150</td>
+            <td>1,550</td>
+            <td>2,030</td>
+            <td>2,570</td>
+            <td>3,180</td>
+            <td>3,830</td>
+            <td>4,560</td>
+        </tr>
+        <!--tr>
+            <th>275</th>
+            <td>260</td>
+            <td>461</td>
+            <td>723</td>
+            <td>1,040</td>
+            <td>1,410</td>
+            <td>1,840</td>
+            <td>2,340</td>
+            <td>2,890</td>
+            <td>3,480</td>
+            <td>4,150</td>
+        </tr-->
+        <tr class="highlighted">
+            <th class="highlighted">300</th>
+            <td>238</td>
+            <td>422</td>
+            <td>661</td>
+            <td>954</td>
+            <td>1,290</td>
+            <td>1,690</td>
+            <td>2,140</td>
+            <td>2,650</td>
+            <td>3,190</td>
+            <td>3,800</td>
+        </tr>
+        <!--tr>
+            <th>350</th>
+            <td>204</td>
+            <td>362</td>
+            <td>568</td>
+            <td>819</td>
+            <td>1,110</td>
+            <td>1,450</td>
+            <td>1,890</td>
+            <td>2,270</td>
+            <td>2,740</td>
+            <td>3,260</td>
+        </tr-->
+        <tr class="highlighted">
+            <th class="highlighted">400</th>
+            <td>178</td>
+            <td>317</td>
+            <td>497</td>
+            <td>716</td>
+            <td>968</td>
+            <td>1,270</td>
+            <td>1,610</td>
+            <td>1,990</td>
+            <td>2,390</td>
+            <td>2,850</td>
+        </tr>
+        <!--tr>
+            <th colspan="2">단위중량<br>(kg/m)</th>
+            <td>0.560</td>
+            <td>0.995</td>
+            <td>1.56</td>
+            <td>2.25</td>
+            <td>3.04</td>
+            <td>3.98</td>
+            <td>5.04</td>
+            <td>6.23</td>
+            <td>7.51</td>
+            <td>8.95</td>
+        </tr-->
+    </table>
+
+    <div class="calculator">
+        <label for="diameter">철근 직경:</label>
+        <select id="diameter">
+            <option value="D10">D10</option>
+            <option value="D13">D13</option>
+            <option value="D16">D16</option>
+            <option value="D19">D19</option>
+            <option value="D22">D22</option>
+            <option value="D25">D25</option>
+            <option value="D29">D29</option>
+            <option value="D32">D32</option>
+            <option value="D35">D35</option>
+            <option value="D38">D38</option>
+        </select>
+
+        <label for="spacing">철근 간격 (mm):</label>
+        <select id="spacing">
+            <option value="100">100</option>
+            <option value="120">120</option>
+            <option value="125">125</option>
+            <option value="140">140</option>
+            <option value="150">150</option>
+            <option value="160">160</option>
+            <option value="175">175</option>
+            <option value="180">180</option>
+            <option value="200">200</option>
+            <option value="220">220</option>
+            <option value="225">225</option>
+            <option value="240">240</option>
+            <option value="250">250</option>
+            <option value="275">275</option>
+            <option value="300">300</option>
+            <option value="350">350</option>
+            <option value="400">400</option>
+        </select>
+
+        <button onclick="calculateRebarAmount()">계산</button>
+
+        <div id="result">
+            <p>1m 당 철근량 (mm²/m):</p>
+            <input type="text" id="resultValue" readonly>
+        </div>
+    </div>
+
+    <script>
+        const rebarData = {
+            "D10": { diameter: 9.53, area: 71.33 },
+            "D13": { diameter: 12.7, area: 126.7 },
+            "D16": { diameter: 15.9, area: 198.6 },
+            "D19": { diameter: 19.1, area: 286.5 },
+            "D22": { diameter: 22.2, area: 387.1 },
+            "D25": { diameter: 25.4, area: 506.7 },
+            "D29": { diameter: 28.6, area: 642.4 },
+            "D32": { diameter: 31.8, area: 794.2 },
+            "D35": { diameter: 34.9, area: 956.6 },
+            "D38": { diameter: 38.1, area: 1140 }
+        };
+
+        function calculateRebarAmount() {
+            const diameter = document.getElementById('diameter').value;
+            const spacing = parseFloat(document.getElementById('spacing').value);
+            
+            const rebarArea = rebarData[diameter].area;
+            const amountPer1000mm = (1000 / spacing) * rebarArea;
+            
+            const resultValueElement = document.getElementById('resultValue');
+            resultValueElement.value = amountPer1000mm.toFixed(2);
+        }
+    </script>
+</body>
+</html>
