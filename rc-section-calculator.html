@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Section Strength Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RC Section Strength Calculator</h1>
+    <div class="input-group">
+        <div>
+            <label for="fck">fck (MPa)</label>
+            <input type="number" id="fck" value="21">
+        </div>
+        <div>
+            <label for="fy">fy (MPa)</label>
+            <input type="number" id="fy" value="300" onchange="updateRebarOptions()">
+        </div>
+        <div>
+            <label for="k1">k1</label>
+            <input type="number" id="k1" value="0.85">
+        </div>
+        <div>
+            <label for="phiF">ΦF</label>
+            <input type="number" id="phiF" value="0.85">
+        </div>
+        <div>
+            <label for="phiV">ΦV</label>
+            <input type="number" id="phiV" value="0.75">
+        </div>
+        <div>
+            <label for="B">B (mm)</label>
+            <input type="number" id="B" value="1000">
+        </div>
+        <div>
+            <label for="H">H (mm)</label>
+            <input type="number" id="H" value="475">
+        </div>
+        <div>
+            <label for="cover">cover (mm)</label>
+            <input type="number" id="cover" value="80">
+        </div>
+        <div>
+            <label for="Mu">Mu (kN⋅m)</label>
+            <input type="number" id="Mu" value="64.28">
+        </div>
+        <div>
+            <label for="Vu">Vu (kN)</label>
+            <input type="number" id="Vu" value="80.35">
+        </div>
+        <div>
+            <label for="rebarDiameter">철근 직경</label>
+            <select id="rebarDiameter"></select>
+        </div>
+        <div>
+            <label for="rebarSpacing">철근 간격 (mm)</label>
+            <select id="rebarSpacing">
+                <option value="100">100</option>
+                <option value="125">125</option>
+                <option value="150">150</option>
+                <option value="200">200</option>
+                <option value="250">250</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+            </select>
+        </div>
+    </div>
+    <button onclick="calculateStrength()">Calculate</button>
+    <div id="results"></div>
+
+    <script>
+        const rebarAreas = [71.33, 126.7, 198.6, 286.5, 387.1, 506.7, 642.4, 794.2, 956.6, 1140];
+        const rebarDiameters = ['10', '13', '16', '19', '22', '25', '29', '32', '35', '38'];
+
+        function updateRebarOptions() {
+            const fy = parseFloat(document.getElementById('fy').value);
+            const rebarSelect = document.getElementById('rebarDiameter');
+            rebarSelect.innerHTML = '';
+            const prefix = fy === 300 ? 'D' : 'H';
+            rebarDiameters.forEach((diameter, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = prefix + diameter;
+                rebarSelect.appendChild(option);
+            });
+        }
+
+        function calculateStrength() {
+            const inputs = {
+                fck: parseFloat(document.getElementById('fck').value),
+                fy: parseFloat(document.getElementById('fy').value),
+                k1: parseFloat(document.getElementById('k1').value),
+                phiF: parseFloat(document.getElementById('phiF').value),
+                phiV: parseFloat(document.getElementById('phiV').value),
+                B: parseFloat(document.getElementById('B').value),
+                H: parseFloat(document.getElementById('H').value),
+                cover: parseFloat(document.getElementById('cover').value),
+                Mu: parseFloat(document.getElementById('Mu').value),
+                Vu: parseFloat(document.getElementById('Vu').value),
+                rebarDiameter: parseInt(document.getElementById('rebarDiameter').value),
+                rebarSpacing: parseFloat(document.getElementById('rebarSpacing').value)
+            };
+
+            const { fck, fy, k1, phiF, B, H, cover, Mu, rebarDiameter, rebarSpacing } = inputs;
+            const d = H - cover;
+            const Es = 200000;
+            const beta1 = 0.85;
+
+            // 선택된 철근의 단면적
+            const As = rebarAreas[rebarDiameter];
+            
+            // 단위 폭당 철근량
+            const As_provided = (As * 1000) / rebarSpacing;
+
+            // 강도감소계수(Φ) 산정
+            const T = As_provided * fy;
+            const a = T / (0.85 * fck * B);
+            const c = a / beta1;
+            const epsilonY = fy / Es;
+            const epsilonT = 0.003 * (d - c) / c;
+            const phi = epsilonT >= 0.005 ? 0.85 : 0.65 + (epsilonT - 0.002) * (200 / 3);
+
+            // 필요철근량 산정
+            const Mu_Nmm = Mu * 1e6;
+            const a_coeff = Math.pow(fy, 2) / (2 * 0.85 * fck * B);
+            const b_coeff = -fy * d;
+            const c_coeff = Mu_Nmm / phi;
+            const discriminant = Math.pow(b_coeff, 2) - 4 * a_coeff * c_coeff;
+            const As_required = (-b_coeff - Math.sqrt(discriminant)) / (2 * a_coeff);
+
+            // 철근비 검토
+            const rhoMin = Math.max(1.4 / fy, 0.25 * Math.sqrt(fck) / fy);
+            const rhoMax = 0.85 * k1 * 0.643 * (fck / fy) * (600 / (600 + fy));
+            const rhoUse = As_provided / (B * d);
+
+            // 휨에 대한 검토
+            const a_final = As_provided * fy / (0.85 * fck * B);
+            const phiMn = phi * As_provided * fy * (d - a_final / 2) / 1e6;
+
+            const results = {
+                d, T, a, c, epsilonY, epsilonT, phi, As_required, As_provided, rhoMin, rhoMax, rhoUse, a_final, phiMn
+            };
+
+            displayResults(inputs, results);
+        }
+
+        function displayResults(inputs, results) {
+            const { fck, fy, k1, phiF, phiV, B, H, cover, Mu, Vu, rebarDiameter, rebarSpacing } = inputs;
+            const { d, T, a, c, epsilonY, epsilonT, phi, As_required, As_provided, rhoMin, rhoMax, rhoUse, a_final, phiMn } = results;
+
+            const prefix = fy === 300 ? 'D' : 'H';
+            const rebarDescription = prefix + rebarDiameters[rebarDiameter];
+
+            const resultText = `
+fck = ${fck} MPa, fy = ${fy} MPa, k1 = ${k1}, ΦF = ${phiF}, ΦV = ${phiV}
+
+B = ${formatNumber(B)} mm, H = ${formatNumber(H)} mm, d = ${formatNumber(d)} mm, 피복 = ${formatNumber(cover)} mm, Mu = ${formatNumber(Mu)} kN⋅m, Vu = ${formatNumber(Vu)} kN
+
+선택된 철근: ${rebarDescription} @ ${rebarSpacing} mm
+
+* 강도감소계수(Φ) 산정
+T = As × fy = ${formatNumber(As_provided)} × ${fy} = ${formatNumber(T)}
+C = 0.85 × fck × a × b = 0.85 × ${fck} × a × ${formatNumber(B)} = ${formatNumber(0.85 * fck * B)} × a
+T = C 이므로, a = ${formatNumber(a)} mm, c = ${formatNumber(a)}/β1 = ${formatNumber(a)}/0.85 = ${formatNumber(c)} mm
+εy = fy/Es = ${fy}/200000.00 = ${formatNumber(epsilonY)}
+εt = 0.00300 × (dt - c)/c = 0.00300 × (${formatNumber(d)} - ${formatNumber(c)})/${formatNumber(c)} = ${formatNumber(epsilonT)}
+εt ≥ 0.00500 이므로 인장지배단면이며, Φ = ${formatNumber(phi)} 를 적용한다.
+
+* 필요철근량 산정
+Mu/Φ = As × fy × (d - a/2)           ----------------   ①
+a = (As × fy)/(0.85 × fck × b)   ----------------   ②
+식②를 식①에 대입하여 이차방정식으로 As를 구한다
+(fy^2 × As^2)/(2 × 0.85 × fck × b) - fy × d × As + Mu/Φ = 0
+As_required = ${formatNumber(As_required)} mm^2
+As_provided = ${formatNumber(As_provided)} mm^2 (${rebarDescription} @ ${rebarSpacing} mm)
+[사용률 = ${formatNumber(As_provided / As_required)}]
+
+* 철근비 검토
+ρmin : 1.4/fy = ${formatNumber(1.4 / fy)}
+0.25√fck/fy = ${formatNumber(0.25 * Math.sqrt(fck) / fy)}, ρmin = ${formatNumber(rhoMin)} 적용
+수축온도철근비 = 0.00200
+ρmax = 0.643 × Pb = 0.850 × k1 × 0.643 × (fck/fy) × (600/(600 + fy)) = ${formatNumber(rhoMax)}
+ρuse = As/(b × d) = ${formatNumber(rhoUse)}
+ρmax ≥ ρuse ≥ ρmin → 철근비 만족,   ∴ O.K
+
+* 휨에 대한 검토
+a = (As × fy)/(0.85 × fck × b) = ${formatNumber(a_final)} mm
+ΦMn = ${formatNumber(phi)} × ${formatNumber(As_provided)} × ${fy} × (${formatNumber(d)} - ${formatNumber(a_final)}/2)
+= ${formatNumber(phiMn)} kN⋅m ≥ Mu (= ${formatNumber(Mu)} kN⋅m)   ∴ O.K  [Ratio ${formatNumber(phiMn / Mu)}]
+            `;
+
+            document.getElementById('results').innerHTML = resultText;
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+        }
+
+        // 초기 실행
+        updateRebarOptions();
+    </script>
+</body>
+</html>
