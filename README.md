@@ -21,4 +21,5 @@ https://dolljong.github.io/ESC_artifacts/
 - coulomb-active-earth-pressure-calculator.html : 주동토압계수(Ka,Coulomb토압) 계산기
 - rebararea.html : 단위 m당 철근단면적 테이블 및 계산기
 - rc-section-calculator.html : RC 단면검토 
+- requiredas.py : RC 필요철근량 산정 파이썬 코드
 
