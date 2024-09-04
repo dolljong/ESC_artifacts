@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단면 특성 계산기 (2D Canvas)</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #input-container { 
+            width: 400px;
+            padding-right: 20px; 
+        }
+        textarea { 
+            width: 100%; 
+            height: 150px; 
+            margin-bottom: 10px; 
+            resize: vertical;
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 5px;
+        }
+        #error { color: red; margin-top: 10px; }
+        #results { margin-top: 20px; }
+        #canvas-container { 
+            flex-grow: 1;
+            min-width: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #sectionCanvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="input-container">
+            <h1>단면 특성 계산기</h1>
+            <p>주의: 절점을 시계 방향 또는 반시계 방향으로 일관되게 입력하세요. 방향은 상관없지만 순서는 연속적이어야 합니다.</p>
+            <textarea id="coordinates" placeholder="x,y 좌표를 입력하세요 (예: 0,0&#10;1,0&#10;1,1&#10;0,1)"></textarea>
+            <button onclick="calculateProperties()">계산</button>
+            <div id="error"></div>
+            <div id="results"></div>
+        </div>
+        <div id="canvas-container">
+            <canvas id="sectionCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sectionCanvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+        let centroid = null;
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const size = Math.min(containerWidth, containerHeight);
+            canvas.width = size;
+            canvas.height = size;
+            drawSection();
+        }
+
+        function drawSection() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (points.length < 3) return;
+
+            const margin = 50;
+            const minX = Math.min(...points.map(p => p.x));
+            const maxX = Math.max(...points.map(p => p.x));
+            const minY = Math.min(...points.map(p => p.y));
+            const maxY = Math.max(...points.map(p => p.y));
+            const rangeX = maxX - minX;
+            const rangeY = maxY - minY;
+            const range = Math.max(rangeX, rangeY);
+            const scale = (canvas.width - 2 * margin) / range;
+
+            function transformX(x) { return (x - minX) * scale + margin; }
+            function transformY(y) { return canvas.height - ((y - minY) * scale + margin); }
+
+            // Draw shape
+            ctx.beginPath();
+            ctx.moveTo(transformX(points[0].x), transformY(points[0].y));
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(transformX(points[i].x), transformY(points[i].y));
+            }
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = 'green';
+            ctx.stroke();
+
+            // Draw points and labels
+            ctx.font = '14px Arial';
+            points.forEach((point, index) => {
+                const x = transformX(point.x);
+                const y = transformY(point.y);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+
+                ctx.fillStyle = 'black';
+                ctx.fillText((index + 1).toString(), x + 10, y - 10);
+            });
+
+            // Draw centroid
+            if (centroid) {
+                const cx = transformX(centroid.x);
+                const cy = transformY(centroid.y);
+                
+                ctx.beginPath();
+                ctx.moveTo(cx - 10, cy);
+                ctx.lineTo(cx + 10, cy);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx, cy + 10);
+                ctx.strokeStyle = 'blue';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        function updateShape() {
+            const coordinates = document.getElementById('coordinates').value;
+            points = coordinates.split('\n').map(line => {
+                const [x, y] = line.split(',').map(Number);
+                return isNaN(x) || isNaN(y) ? null : { x, y };
+            }).filter(point => point !== null);
+
+            if (points.length < 3) {
+                document.getElementById('error').textContent = '최소 3개의 점이 필요합니다';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            document.getElementById('error').textContent = '';
+            centroid = null;  // Reset centroid when shape is updated
+            drawSection();
+        }
+
+        function calculateProperties() {
+            if (points.length < 3) {
+                document.getElementById('error').textContent = '최소 3개의 점이 필요합니다';
+                document.getElementById('results').textContent = '';
+                return;
+            }
+
+            let area = 0;
+            let cx = 0;
+            let cy = 0;
+
+            for (let i = 0; i < points.length; i++) {
+                const j = (i + 1) % points.length;
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+
+                const dArea = (xi * yj - xj * yi) / 2;
+                area += dArea;
+
+                cx += (xi + xj) * dArea;
+                cy += (yi + yj) * dArea;
+            }
+
+            cx /= (3 * area);
+            cy /= (3 * area);
+
+            centroid = { x: cx, y: cy };
+
+            let Ixx = 0, Iyy = 0, Ixy = 0;
+
+            for (let i = 0; i < points.length; i++) {
+                const j = (i + 1) % points.length;
+                const xi = points[i].x, yi = points[i].y;
+                const xj = points[j].x, yj = points[j].y;
+
+                Ixx += ((yi*yi + yi*yj + yj*yj) * (xi*yj - xj*yi)) / 12;
+                Iyy += ((xi*xi + xi*xj + xj*xj) * (xi*yj - xj*yi)) / 12;
+                Ixy += ((xi*yj + 2*xi*yi + 2*xj*yj + xj*yi) * (xi*yj - xj*yi)) / 24;
+            }
+
+            Ixx = Math.abs(Ixx - area * cy * cy);
+            Iyy = Math.abs(Iyy - area * cx * cx);
+            Ixy = Ixy - area * cx * cy;
+
+            area = Math.abs(area);
+
+            document.getElementById('results').innerHTML = `
+                <h2>결과:</h2>
+                <p>단면적: ${area.toFixed(4)}</p>
+                <p>도심 x좌표: ${cx.toFixed(4)}</p>
+                <p>도심 y좌표: ${cy.toFixed(4)}</p>
+                <p>도심에 대한 x축 단면2차 모멘트 (Ixx): ${Ixx.toFixed(4)}</p>
+                <p>도심에 대한 y축 단면2차 모멘트 (Iyy): ${Iyy.toFixed(4)}</p>
+                <p>도심에 대한 극단면2차 모멘트 (Ixy): ${Ixy.toFixed(4)}</p>
+            `;
+
+            drawSection();
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            resizeCanvas();
+            document.getElementById('coordinates').addEventListener('input', updateShape);
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
